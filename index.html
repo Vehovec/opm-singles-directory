@@ -330,7 +330,7 @@
       <span class="count-badge" id="profile-count">0 members</span>
     </div>
     <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Search by name, city, interests..." oninput="filterProfiles()">
+      <input type="text" id="search-input" placeholder="Search name, city, country, language, interests, about..." oninput="filterProfiles()" style="flex:2; min-width:220px;">
       <select id="filter-gender" onchange="filterProfiles()">
         <option value="">All genders</option>
         <option>Man</option>
@@ -340,6 +340,10 @@
       <select id="filter-country" onchange="filterProfiles()">
         <option value="">All countries</option>
       </select>
+      <select id="filter-class" onchange="filterProfiles()">
+        <option value="">All OPM classes</option>
+      </select>
+      <button class="btn btn-outline btn-sm" style="border-color:var(--border); color:var(--text-muted); background:white;" onclick="clearFilters()">Clear</button>
     </div>
     <div class="profiles-grid" id="profiles-grid"></div>
   </div>
@@ -357,6 +361,57 @@
         <input type="password" id="admin-password-input" onkeydown="if(event.key==='Enter') doAdminLogin()">
       </div>
       <button class="btn btn-navy" style="width:100%; justify-content:center; padding:0.75rem;" onclick="doAdminLogin()">Access Admin Panel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBER SELF-EDIT MODAL -->
+<div class="modal-overlay" id="self-edit-modal">
+  <div class="modal">
+    <div class="modal-body">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <h3 style="font-family:'Playfair Display',serif; font-size:1.3rem;">Edit My Profile</h3>
+        <button class="modal-close" onclick="closeSelfEditModal()">&#x2715;</button>
+      </div>
+      <input type="hidden" id="self-edit-row-id">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="self-edit-name"></div>
+      <div class="section-label">OPM Details</div>
+      <div class="form-row">
+        <div class="form-group"><label>OPM Class</label><input type="number" id="self-edit-class"></div>
+        <div class="form-group"><label>OPM Year</label><input type="number" id="self-edit-year"></div>
+      </div>
+      <div class="section-label">About You</div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input type="text" id="self-edit-city"></div>
+        <div class="form-group"><label>Country</label><input type="text" id="self-edit-country"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gender</label>
+          <select id="self-edit-gender"><option>Man</option><option>Woman</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Age (optional)</label><input type="number" id="self-edit-age"></div>
+      </div>
+      <div class="form-group"><label>Languages</label><input type="text" id="self-edit-languages"></div>
+      <div class="form-group"><label>About Me</label><textarea id="self-edit-about"></textarea></div>
+      <div class="form-group"><label>What I'm Looking For</label><textarea id="self-edit-looking"></textarea></div>
+      <div class="form-group"><label>Interests & Hobbies</label><input type="text" id="self-edit-interests"></div>
+      <div class="section-label">Photo & Social</div>
+      <div class="form-group"><label>Photo URL</label><input type="url" id="self-edit-photo">
+        <div class="form-note">Paste a direct link to a publicly accessible photo.</div>
+      </div>
+      <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="self-edit-whatsapp" placeholder="+1 416 555 0123"></div>
+      <div class="form-group"><label>LinkedIn URL</label><input type="url" id="self-edit-linkedin"></div>
+      <div class="form-group"><label>Facebook URL</label><input type="url" id="self-edit-facebook"></div>
+      <div class="form-group"><label>Instagram URL</label><input type="url" id="self-edit-instagram"></div>
+      <div class="form-group"><label>Preferred Contact Method</label>
+        <select id="self-edit-contact"><option>WhatsApp</option><option>Email</option><option>LinkedIn</option><option>Facebook</option><option>Instagram</option></select>
+      </div>
+      <div id="self-edit-msg"></div>
+      <div style="display:flex; gap:0.75rem; margin-top:0.75rem;">
+        <button class="btn btn-gold" style="flex:1; justify-content:center; padding:0.75rem;" onclick="saveSelfEdit()">Save Changes</button>
+        <button class="btn btn-outline btn-sm" style="border-color:var(--border); color:var(--text-muted);" onclick="closeSelfEditModal()">Cancel</button>
+      </div>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.75rem; text-align:center;">To change your email address, please contact an admin.</p>
     </div>
   </div>
 </div>
@@ -491,7 +546,8 @@ function showScreen(name) {
 function updateHeader(screen) {
   const hr = document.getElementById('header-right');
   if (screen === 'directory') {
-    hr.innerHTML = `<button class="btn btn-outline" onclick="showScreen('landing')">Home</button>
+    hr.innerHTML = `<button class="btn btn-outline" onclick="openSelfEdit()">Edit My Profile</button>
+      <button class="btn btn-outline" onclick="showScreen('landing')">Home</button>
       <button class="btn btn-outline" onclick="doLogout()">Sign Out</button>`;
   } else if (screen === 'admin') {
     hr.innerHTML = `<button class="btn btn-outline" onclick="showScreen('landing')">Home</button>
@@ -597,6 +653,11 @@ function populateCountryFilter() {
   const sel = document.getElementById('filter-country');
   sel.innerHTML = '<option value="">All countries</option>';
   countries.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+
+  const classes = [...new Set(allProfiles.map(p => p.opmClass).filter(Boolean))].sort((a,b) => a-b);
+  const csel = document.getElementById('filter-class');
+  csel.innerHTML = '<option value="">All OPM classes</option>';
+  classes.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = 'OPM ' + c; csel.appendChild(o); });
 }
 
 function getInitials(name) {
@@ -635,13 +696,27 @@ function filterProfiles() {
   const q = document.getElementById('search-input').value.toLowerCase();
   const gender = document.getElementById('filter-gender').value;
   const country = document.getElementById('filter-country').value;
+  const opmClass = document.getElementById('filter-class').value;
   const filtered = allProfiles.filter(p => {
-    const text = [p.fullName, p.city, p.country, p.interests, p.aboutMe, p.languages].join(' ').toLowerCase();
+    const text = [
+      p.fullName, p.city, p.country, p.interests, p.aboutMe,
+      p.languages, p.lookingFor, p.opmClass, p.opmYear,
+      p.gender, p.age, p.contactMethod
+    ].join(' ').toLowerCase();
     return (!q || text.includes(q)) &&
            (!gender || p.gender === gender) &&
-           (!country || p.country === country);
+           (!country || p.country === country) &&
+           (!opmClass || String(p.opmClass) === String(opmClass));
   });
   renderProfiles(filtered);
+}
+
+function clearFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('filter-gender').value = '';
+  document.getElementById('filter-country').value = '';
+  document.getElementById('filter-class').value = '';
+  renderProfiles(allProfiles);
 }
 
 function openProfile(idx) {
@@ -819,6 +894,69 @@ async function confirmDelete(idx) {
   }
 }
 
+function openSelfEdit() {
+  const p = allProfiles.find(p => p.email.toLowerCase().trim() === currentUser.toLowerCase().trim());
+  if (!p) { alert('Could not find your profile. Please contact an admin.'); return; }
+  document.getElementById('self-edit-row-id').value = p.id;
+  document.getElementById('self-edit-name').value = p.fullName || '';
+  document.getElementById('self-edit-class').value = p.opmClass || '';
+  document.getElementById('self-edit-year').value = p.opmYear || '';
+  document.getElementById('self-edit-city').value = p.city || '';
+  document.getElementById('self-edit-country').value = p.country || '';
+  document.getElementById('self-edit-gender').value = p.gender || 'Man';
+  document.getElementById('self-edit-age').value = p.age || '';
+  document.getElementById('self-edit-languages').value = p.languages || '';
+  document.getElementById('self-edit-about').value = p.aboutMe || '';
+  document.getElementById('self-edit-looking').value = p.lookingFor || '';
+  document.getElementById('self-edit-interests').value = p.interests || '';
+  document.getElementById('self-edit-photo').value = p.photoUrl || '';
+  document.getElementById('self-edit-whatsapp').value = p.whatsapp || '';
+  document.getElementById('self-edit-linkedin').value = p.linkedin || '';
+  document.getElementById('self-edit-facebook').value = p.facebook || '';
+  document.getElementById('self-edit-instagram').value = p.instagram || '';
+  document.getElementById('self-edit-contact').value = p.contactMethod || 'WhatsApp';
+  document.getElementById('self-edit-msg').innerHTML = '';
+  document.getElementById('self-edit-modal').classList.add('open');
+}
+
+function closeSelfEditModal() { document.getElementById('self-edit-modal').classList.remove('open'); }
+
+async function saveSelfEdit() {
+  const get = id => document.getElementById(id).value.trim();
+  const msgEl = document.getElementById('self-edit-msg');
+  if (!get('self-edit-name')) { msgEl.innerHTML = '<div class="msg msg-error">Full name is required.</div>'; return; }
+  showLoading('Saving your profile...');
+  try {
+    const result = await apiCall({
+      action: 'updateProfile',
+      adminPassword: 'SELF_EDIT',
+      selfEditEmail: currentUser,
+      rowId: get('self-edit-row-id'),
+      email: currentUser,
+      fullName: get('self-edit-name'),
+      opmClass: get('self-edit-class'), opmYear: get('self-edit-year'),
+      city: get('self-edit-city'), country: get('self-edit-country'),
+      gender: get('self-edit-gender'), age: get('self-edit-age'),
+      languages: get('self-edit-languages'), aboutMe: get('self-edit-about'),
+      lookingFor: get('self-edit-looking'), interests: get('self-edit-interests'),
+      photoUrl: get('self-edit-photo'), whatsapp: get('self-edit-whatsapp'),
+      linkedin: get('self-edit-linkedin'), facebook: get('self-edit-facebook'),
+      instagram: get('self-edit-instagram'), contactMethod: get('self-edit-contact')
+    });
+    hideLoading();
+    if (result.success) {
+      closeSelfEditModal();
+      msgEl.innerHTML = '';
+      await loadDirectory();
+    } else {
+      msgEl.innerHTML = `<div class="msg msg-error">${result.message}</div>`;
+    }
+  } catch(e) {
+    hideLoading();
+    msgEl.innerHTML = '<div class="msg msg-error">Connection error. Please try again.</div>';
+  }
+}
+
 function doLogout() {
   currentUser = null;
   adminPassword = null;
@@ -826,6 +964,9 @@ function doLogout() {
   showScreen('landing');
 }
 
+document.getElementById('self-edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSelfEditModal();
+});
 document.getElementById('profile-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });

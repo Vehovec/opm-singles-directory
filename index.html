@@ -82,7 +82,7 @@
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,15,30,0.65); z-index: 100; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--white); border-radius: 16px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: auto; }
-  .modal-img { width: 100%; height: 280px; object-fit: cover; }
+  .modal-img { width: 100%; height: 280px; object-fit: cover; object-position: center 20%; }
   .modal-img-placeholder { width: 100%; height: 280px; background: linear-gradient(135deg, var(--navy) 0%, #253563 100%); display: flex; align-items: center; justify-content: center; }
   .modal-body { padding: 1.75rem 2rem; }
   .modal-name { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 0.3rem; }
@@ -252,7 +252,7 @@
       </div>
       <div class="form-group">
         <label>Interests & Hobbies</label>
-        <input type="text" id="sub-interests" placeholder="Travel, golf, wine, opera...">
+        <textarea id="sub-interests" placeholder="Travel, golf, wine, opera..." style="min-height:100px;"></textarea>
       </div>
       <div class="section-label">Profile Photo</div>
       <div class="form-group">
@@ -414,7 +414,7 @@
       <div class="form-group"><label>Languages</label><input type="text" id="edit-languages"></div>
       <div class="form-group"><label>About Me</label><textarea id="edit-about"></textarea></div>
       <div class="form-group"><label>Looking For</label><textarea id="edit-looking"></textarea></div>
-      <div class="form-group"><label>Interests</label><input type="text" id="edit-interests"></div>
+      <div class="form-group"><label>Interests</label><textarea id="edit-interests" style="min-height:100px;"></textarea></div>
       <div class="section-label">Profile Photo</div>
       <div class="form-group">
         <div id="edit-photo-preview" style="margin-bottom:0.75rem;"></div>
@@ -468,7 +468,7 @@
       <div class="form-group"><label>Languages</label><input type="text" id="self-edit-languages"></div>
       <div class="form-group"><label>About Me</label><textarea id="self-edit-about"></textarea></div>
       <div class="form-group"><label>What I'm Looking For</label><textarea id="self-edit-looking"></textarea></div>
-      <div class="form-group"><label>Interests & Hobbies</label><input type="text" id="self-edit-interests"></div>
+      <div class="form-group"><label>Interests & Hobbies</label><textarea id="self-edit-interests" style="min-height:100px;"></textarea></div>
       <div class="section-label">Profile Photo</div>
       <div class="form-group">
         <div id="self-edit-photo-preview" style="margin-bottom:0.75rem;"></div>
@@ -1039,6 +1039,13 @@ function fixUrl(url) {
 }
 
 function doLogout() { currentUser = null; adminPassword = null; allProfiles = []; showScreen('landing'); }
+
+document.querySelectorAll('textarea').forEach(ta => {
+  ta.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+  });
+});
 
 ['profile-modal','edit-modal','self-edit-modal'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });

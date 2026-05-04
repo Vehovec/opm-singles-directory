@@ -82,8 +82,8 @@
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,15,30,0.65); z-index: 100; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
   .modal-overlay.open { display: flex; }
   .modal { background: var(--white); border-radius: 16px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: auto; }
-  .modal-img { width: 100%; height: 280px; object-fit: cover; object-position: center 20%; }
-  .modal-img-placeholder { width: 100%; height: 280px; background: linear-gradient(135deg, var(--navy) 0%, #253563 100%); display: flex; align-items: center; justify-content: center; }
+  .modal-img { width: 100%; height: 220px; object-fit: cover; object-position: center 35%; }
+  .modal-img-placeholder { width: 100%; height: 220px; background: linear-gradient(135deg, var(--navy) 0%, #253563 100%); display: flex; align-items: center; justify-content: center; }
   .modal-body { padding: 1.75rem 2rem; }
   .modal-name { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 0.3rem; }
   .modal-class { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
@@ -810,32 +810,48 @@ function clearFilters() {
 }
 
 function openProfile(idx) {
-  const p = allProfiles[idx];
-  document.getElementById('modal-img-wrap').innerHTML = p.photoUrl
-    ? `<img src="${p.photoUrl}" class="modal-img" alt="${p.fullName}" onerror="this.outerHTML='<div class=\'modal-img-placeholder\'><div class=\'profile-initials\' style=\'font-size:4rem;\'>${getInitials(p.fullName)}</div></div>'">`
-    : `<div class="modal-img-placeholder"><div class="profile-initials" style="font-size:4rem;">${getInitials(p.fullName)}</div></div>`;
-  document.getElementById('modal-name').textContent = p.fullName;
-  document.getElementById('modal-class').textContent = `OPM Class ${p.opmClass} (${p.opmYear}) · ${p.city}, ${p.country}`;
-  document.getElementById('modal-tags').innerHTML = `
-    <span class="tag tag-navy">${p.gender}</span>
-    ${p.age ? `<span class="tag tag-gold">Age ${p.age}</span>` : ''}
-    ${p.languages ? p.languages.split(',').map(l => `<span class="tag tag-gold">${l.trim()}</span>`).join('') : ''}`;
-  const setSection = (secId, pId, val) => {
-    document.getElementById(secId).style.display = val ? 'block' : 'none';
-    if (val) document.getElementById(pId).textContent = val;
-  };
-  setSection('modal-about-sec', 'modal-about', p.aboutMe);
-  setSection('modal-looking-sec', 'modal-looking', p.lookingFor);
-  setSection('modal-interests-sec', 'modal-interests', p.interests);
-  let socialHTML = '';
-  if (p.whatsapp) socialHTML += `<a href="https://wa.me/${p.whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="social-link social-whatsapp">WhatsApp</a>`;
-  if (p.linkedin) socialHTML += `<a href="${p.linkedin}" target="_blank" class="social-link social-linkedin">LinkedIn</a>`;
-  if (p.facebook) socialHTML += `<a href="${p.facebook}" target="_blank" class="social-link social-facebook">Facebook</a>`;
-  if (p.instagram) socialHTML += `<a href="${p.instagram}" target="_blank" class="social-link social-instagram">Instagram</a>`;
-  document.getElementById('modal-social').innerHTML = socialHTML;
-  document.getElementById('modal-social-sec').style.display = socialHTML ? 'block' : 'none';
-  document.getElementById('modal-contact').textContent = p.contactMethod ? 'Preferred contact: ' + p.contactMethod : '';
-  document.getElementById('profile-modal').classList.add('open');
+  try {
+    const p = allProfiles[idx];
+    if (!p) return;
+    const initials = getInitials(p.fullName || '?');
+    const placeholder = `<div class="modal-img-placeholder"><div class="profile-initials" style="font-size:4rem;">${initials}</div></div>`;
+    if (p.photoUrl) {
+      const img = document.createElement('img');
+      img.src = p.photoUrl;
+      img.className = 'modal-img';
+      img.alt = p.fullName || '';
+      img.onerror = function() { this.parentNode.innerHTML = placeholder; };
+      const wrap = document.getElementById('modal-img-wrap');
+      wrap.innerHTML = '';
+      wrap.appendChild(img);
+    } else {
+      document.getElementById('modal-img-wrap').innerHTML = placeholder;
+    }
+    document.getElementById('modal-name').textContent = p.fullName || '';
+    document.getElementById('modal-class').textContent = `OPM Class ${p.opmClass || '?'} (${p.opmYear || '?'}) · ${p.city || ''}, ${p.country || ''}`;
+    document.getElementById('modal-tags').innerHTML = `
+      <span class="tag tag-navy">${p.gender || ''}</span>
+      ${p.age ? `<span class="tag tag-gold">Age ${p.age}</span>` : ''}
+      ${p.languages ? p.languages.split(',').map(l => `<span class="tag tag-gold">${l.trim()}</span>`).join('') : ''}`;
+    const setSection = (secId, pId, val) => {
+      document.getElementById(secId).style.display = val ? 'block' : 'none';
+      if (val) document.getElementById(pId).textContent = val;
+    };
+    setSection('modal-about-sec', 'modal-about', p.aboutMe);
+    setSection('modal-looking-sec', 'modal-looking', p.lookingFor);
+    setSection('modal-interests-sec', 'modal-interests', p.interests);
+    let socialHTML = '';
+    if (p.whatsapp) socialHTML += `<a href="https://wa.me/${p.whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="social-link social-whatsapp">WhatsApp</a>`;
+    if (p.linkedin) socialHTML += `<a href="${p.linkedin}" target="_blank" class="social-link social-linkedin">LinkedIn</a>`;
+    if (p.facebook) socialHTML += `<a href="${p.facebook}" target="_blank" class="social-link social-facebook">Facebook</a>`;
+    if (p.instagram) socialHTML += `<a href="${p.instagram}" target="_blank" class="social-link social-instagram">Instagram</a>`;
+    document.getElementById('modal-social').innerHTML = socialHTML;
+    document.getElementById('modal-social-sec').style.display = socialHTML ? 'block' : 'none';
+    document.getElementById('modal-contact').textContent = p.contactMethod ? 'Preferred contact: ' + p.contactMethod : '';
+    document.getElementById('profile-modal').classList.add('open');
+  } catch(e) {
+    console.error('Error opening profile:', e);
+  }
 }
 
 function closeModal() { document.getElementById('profile-modal').classList.remove('open'); }

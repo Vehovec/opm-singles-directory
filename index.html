@@ -731,7 +731,7 @@ async function loadDirectory() {
     const result = await apiCall({ action: 'getProfiles' });
     hideLoading();
     if (result.success) {
-      allProfiles = result.profiles;
+      allProfiles = result.profiles.sort(() => Math.random() - 0.5);
       populateFilters();
       renderProfiles(allProfiles);
       showScreen('directory');

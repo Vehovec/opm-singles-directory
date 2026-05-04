@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OPM Singles Directory</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%231a2744'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='26' font-weight='bold' fill='%23c9a84c'>OPM</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
@@ -635,10 +636,17 @@ async function uploadPhotoIfNeeded(context) {
   const base64 = dataEl.value;
   showLoading('Uploading photo...');
   try {
-    const result = await apiCall({ action: 'uploadPhoto', photoData: base64, mimeType: 'image/jpeg' });
+    const formData = new FormData();
+    formData.append('action', 'uploadPhoto');
+    formData.append('photoData', base64);
+    formData.append('mimeType', 'image/jpeg');
+    const resp = await fetch(SCRIPT_URL, { method: 'POST', body: formData });
+    const result = await resp.json();
+    hideLoading();
     if (result.success) return result.photoUrl;
     else { alert('Photo upload failed: ' + result.message); return null; }
   } catch(e) {
+    hideLoading();
     alert('Photo upload error. Please try again.');
     return null;
   }
@@ -700,8 +708,8 @@ async function doSubmit() {
       languages: get('sub-languages'), aboutMe: get('sub-about'),
       lookingFor: get('sub-looking'), interests: get('sub-interests'),
       photoUrl, whatsapp: get('sub-whatsapp'),
-      linkedin: get('sub-linkedin'), facebook: get('sub-facebook'),
-      instagram: get('sub-instagram'), contactMethod: get('sub-contact')
+      linkedin: fixUrl(get('sub-linkedin')), facebook: fixUrl(get('sub-facebook')),
+      instagram: fixUrl(get('sub-instagram')), contactMethod: get('sub-contact')
     });
     hideLoading();
     if (result.success) {
@@ -939,8 +947,8 @@ async function saveEdit() {
       languages: get('edit-languages'), aboutMe: get('edit-about'),
       lookingFor: get('edit-looking'), interests: get('edit-interests'),
       photoUrl, whatsapp: get('edit-whatsapp'),
-      linkedin: get('edit-linkedin'), facebook: get('edit-facebook'),
-      instagram: get('edit-instagram'), contactMethod: get('edit-contact')
+      linkedin: fixUrl(get('edit-linkedin')), facebook: fixUrl(get('edit-facebook')),
+      instagram: fixUrl(get('edit-instagram')), contactMethod: get('edit-contact')
     });
     hideLoading();
     if (result.success) { closeEditModal(); await loadAdminPanel(); }
@@ -1012,13 +1020,22 @@ async function saveSelfEdit() {
       languages: get('self-edit-languages'), aboutMe: get('self-edit-about'),
       lookingFor: get('self-edit-looking'), interests: get('self-edit-interests'),
       photoUrl, whatsapp: get('self-edit-whatsapp'),
-      linkedin: get('self-edit-linkedin'), facebook: get('self-edit-facebook'),
-      instagram: get('self-edit-instagram'), contactMethod: get('self-edit-contact')
+      linkedin: fixUrl(get('self-edit-linkedin')), facebook: fixUrl(get('self-edit-facebook')),
+      instagram: fixUrl(get('self-edit-instagram')), contactMethod: get('self-edit-contact')
     });
     hideLoading();
     if (result.success) { closeSelfEditModal(); await loadDirectory(); }
     else { msgEl.innerHTML = `<div class="msg msg-error">${result.message}</div>`; }
   } catch(e) { hideLoading(); msgEl.innerHTML = '<div class="msg msg-error">Connection error. Please try again.</div>'; }
+}
+
+function fixUrl(url) {
+  if (!url) return '';
+  url = url.trim();
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+  return url;
 }
 
 function doLogout() { currentUser = null; adminPassword = null; allProfiles = []; showScreen('landing'); }

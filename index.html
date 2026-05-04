@@ -841,7 +841,7 @@ function openProfile(idx) {
     setSection('modal-looking-sec', 'modal-looking', p.lookingFor);
     setSection('modal-interests-sec', 'modal-interests', p.interests);
     let socialHTML = '';
-    if (p.whatsapp) socialHTML += `<a href="https://wa.me/${p.whatsapp.replace(/[^0-9]/g,'')}" target="_blank" class="social-link social-whatsapp">WhatsApp</a>`;
+    if (p.whatsapp) socialHTML += `<a href="https://wa.me/${String(p.whatsapp).replace(/[^0-9]/g,'')}" target="_blank" class="social-link social-whatsapp">WhatsApp</a>`;
     if (p.linkedin) socialHTML += `<a href="${p.linkedin}" target="_blank" class="social-link social-linkedin">LinkedIn</a>`;
     if (p.facebook) socialHTML += `<a href="${p.facebook}" target="_blank" class="social-link social-facebook">Facebook</a>`;
     if (p.instagram) socialHTML += `<a href="${p.instagram}" target="_blank" class="social-link social-instagram">Instagram</a>`;

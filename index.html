@@ -771,7 +771,7 @@ function renderProfiles(profiles) {
         <div class="profile-card-tags">
           <span class="tag tag-navy">${p.gender}</span>
           ${p.age ? `<span class="tag tag-gold">Age ${p.age}</span>` : ''}
-          ${p.languages ? `<span class="tag tag-gold">${p.languages.split(',')[0].trim()}</span>` : ''}
+          ${p.languages ? p.languages.split(',').map(l => `<span class="tag tag-gold">${l.trim()}</span>`).join('') : ''}
         </div>
       </div>
     </div>

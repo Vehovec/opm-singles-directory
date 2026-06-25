@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OPM Singles Directory</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 85 C50 85 15 60 15 35 C15 22 25 12 38 12 C44 12 49 15 50 18 C51 15 56 12 62 12 C75 12 85 22 85 35 C85 60 50 85 50 85Z' fill='%23A51C30'/></svg>">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -152,6 +154,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .affil-badge {
   position: absolute; top: 10px; right: 10px; padding: 3px 9px; border-radius: 20px;
   font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em; backdrop-filter: blur(8px);
+}
+.affil-badges {
+  position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
 }
 .affil-opm { background: rgba(165,28,48,0.85); color: white; }
 .affil-ypo { background: rgba(0,80,160,0.85); color: white; }
@@ -351,9 +356,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <div class="login-box">
     <div class="login-logo">
       <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="26" cy="26" r="24" stroke="#A51C30" stroke-width="2"/>
-        <path d="M26 14C26 14 18 18 18 26C18 30.4 21.6 34 26 34C30.4 34 34 30.4 34 26C34 18 26 14 26 14Z" fill="#A51C30" opacity="0.8"/>
-        <path d="M26 20C26 20 21 23 21 27C21 29.8 23.2 32 26 32C28.8 32 31 29.8 31 27C31 23 26 20 26 20Z" fill="#A51C30"/>
+        <circle cx="26" cy="26" r="25" fill="#A51C30"/>
+        <text x="26" y="32" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="bold" fill="white" letter-spacing="1">OPM</text>
       </svg>
     </div>
     <h1>OPM Singles Directory</h1>
@@ -380,8 +384,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div class="header-left">
       <div class="header-logo">
         <svg viewBox="0 0 28 28" fill="none">
-          <circle cx="14" cy="14" r="13" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-          <path d="M14 6C14 6 9 9 9 14C9 16.8 11.2 19 14 19C16.8 19 19 16.8 19 14C19 9 14 6 14 6Z" fill="#A51C30" opacity="0.9"/>
+          <circle cx="14" cy="14" r="14" fill="#A51C30"/>
+          <text x="14" y="18" text-anchor="middle" font-family="Georgia,serif" font-size="8" font-weight="bold" fill="white" letter-spacing="0.5">OPM</text>
         </svg>
       </div>
       <span class="header-title">OPM Singles Directory</span>
@@ -524,7 +528,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         <div class="form-row">
           <label>OPM Class #</label>
           <input type="text" id="fOpmClass" placeholder="e.g. 64">
-          <div class="form-hint">Leave blank if YPO only</div>
+          <div class="form-hint">Leave blank if YPO only. Do not enter 0.</div>
         </div>
         <div class="form-row">
           <label>OPM Year</label>
@@ -816,6 +820,17 @@ function affiliLabel(a) {
   return a || 'OPM';
 }
 
+function affiliBadgesHtml(a, position) {
+  const style = position ? `position:absolute;top:10px;right:10px;` : `position:static;`;
+  if (a === 'Both') {
+    return `<div class="affil-badges" style="${position ? 'position:absolute;top:10px;right:10px;' : 'position:static;display:flex;flex-direction:column;gap:3px;align-items:flex-end;'}">
+      <span class="affil-badge affil-opm" style="position:static;">OPM</span>
+      <span class="affil-badge affil-ypo" style="position:static;">YPO</span>
+    </div>`;
+  }
+  return `<span class="affil-badge ${affiliClass(a)}" style="${position ? 'position:absolute;top:10px;right:10px;' : 'position:static;'}">${affiliLabel(a)}</span>`;
+}
+
 function makeCard(p) {
   const card = document.createElement('div');
   card.className = 'card';
@@ -837,10 +852,9 @@ function makeCard(p) {
   } else {
     banner.innerHTML = `<div class="card-banner-placeholder">${svgPerson()}</div>`;
   }
-  const badge = document.createElement('span');
-  badge.className = `affil-badge ${affiliClass(p.affiliation)}`;
-  badge.textContent = affiliLabel(p.affiliation);
-  banner.appendChild(badge);
+  const badge = document.createElement('div');
+  badge.innerHTML = affiliBadgesHtml(p.affiliation, true);
+  banner.appendChild(badge.firstElementChild);
 
   const body = document.createElement('div');
   body.className = 'card-body';
@@ -907,7 +921,7 @@ function openProfile(p) {
     ${p.photoUrl
       ? `<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover;object-position:center ${p.photoPosition || 30}%;">`
       : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0.15;">${svgPerson(60)}</div>`}
-    <span class="affil-badge ${affiliClass(p.affiliation)}" style="position:absolute;top:12px;right:12px;">${affiliLabel(p.affiliation)}</span>`;
+    ${affiliBadgesHtml(p.affiliation, true)}`;
 
   let html = `<div class="modal-name">${escHtml(p.fullName || '—')}</div>`;
   html += `<div class="modal-meta">`;
@@ -1015,7 +1029,10 @@ function clearForm() {
 function toggleYpoField() {
   const affil = document.getElementById('fAffiliation').value;
   const show = affil === 'YPO' || affil === 'Both';
-  document.getElementById('ypoChapterRow').style.opacity = show ? '1' : '0.4';
+  const row = document.getElementById('ypoChapterRow');
+  row.style.opacity = show ? '1' : '0.4';
+  const label = row.querySelector('label');
+  label.textContent = show ? 'YPO Chapter *' : 'YPO Chapter';
 }
 
 function previewPhoto(event) {
@@ -1033,7 +1050,25 @@ function submitProfile() {
   const mode = document.getElementById('formMode').value;
   const name = document.getElementById('fFullName').value.trim();
   const email = document.getElementById('fEmail').value.trim();
+  const affiliation = document.getElementById('fAffiliation').value;
+  const ypoChapter = document.getElementById('fYpoChapter').value.trim();
+  const opmClass = document.getElementById('fOpmClass').value.trim();
+
   if (!name || !email) { showToast('Name and email are required.', 'error'); return; }
+
+  // YPO chapter required for YPO or Both
+  if ((affiliation === 'YPO' || affiliation === 'Both') && !ypoChapter) {
+    showToast('Please enter your YPO Chapter.', 'error');
+    document.getElementById('fYpoChapter').focus();
+    return;
+  }
+
+  // Block OPM Class = 0
+  if (opmClass !== '' && (parseInt(opmClass) <= 0 || isNaN(parseInt(opmClass)))) {
+    showToast('Please enter a valid OPM Class number, or leave it blank if YPO only.', 'error');
+    document.getElementById('fOpmClass').focus();
+    return;
+  }
 
   const btn = document.getElementById('formSubmitBtn');
   btn.disabled = true;
